@@ -1,0 +1,60 @@
+import { Body, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { EntityManager, Repository } from 'typeorm';
+
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    private readonly entityManager: EntityManager,
+  ) {}
+
+  async findAll(
+    role?: 'BASIC' | 'ADMIN',
+    take?: number,
+    skip?: number,
+  ): Promise<User[]> {
+    const [result, total] = await this.usersRepository.findAndCount({
+      order: { name: 'DESC' },
+      take: take,
+      skip: skip,
+    });
+
+    console.log('count: ', total);
+
+    return [...result];
+  }
+
+  async findOne(id: number): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) throw new NotFoundException('User Not Found');
+
+    return user;
+  }
+
+  async create(@Body() createUserDto: CreateUserDto): Promise<void> {
+    const user = new User(createUserDto);
+    await this.entityManager.save(user);
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
+    await this.entityManager.transaction(async (entityManager) => {
+      const user = await this.findOne(id);
+
+      user.name = updateUserDto.name;
+      user.email = updateUserDto.email;
+      user.role = updateUserDto.role;
+
+      await entityManager.save(user);
+    });
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
+  }
+}
