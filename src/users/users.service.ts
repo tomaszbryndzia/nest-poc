@@ -37,6 +37,14 @@ export class UsersService {
     return user;
   }
 
+  async findOneByEmail(email: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ email });
+
+    if (!user) throw new NotFoundException('User Not Found');
+
+    return user;
+  }
+
   async create(@Body() createUserDto: CreateUserDto): Promise<void> {
     const user = new User(createUserDto);
     await this.entityManager.save(user);
@@ -49,6 +57,7 @@ export class UsersService {
       user.name = updateUserDto.name;
       user.email = updateUserDto.email;
       user.role = updateUserDto.role;
+      user.password = updateUserDto.password;
 
       await entityManager.save(user);
     });
