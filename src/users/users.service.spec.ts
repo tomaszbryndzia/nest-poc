@@ -1,18 +1,33 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
+import { Repository, EntityManager } from 'typeorm';
+import { User } from './entities/user.entity';
 
-describe('UsersService', () => {
-  let service: UsersService;
+const mockRepository: Repository<User> = {} as Repository<User>;
+const mockEntityManager: EntityManager = {} as EntityManager;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService],
-    }).compile();
+describe('UsersController', () => {
+  let usersService: UsersService;
 
-    service = module.get<UsersService>(UsersService);
+  beforeEach(() => {
+    usersService = new UsersService(mockRepository, mockEntityManager);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('findAll', () => {
+    it('should return an array of users', async () => {
+      const mockUsers: User[] = [
+        {
+          id: 1,
+          name: 'John',
+          email: 'john.johnson@johnsville.com',
+          password: 'reallySecured',
+          role: 'BASIC',
+        },
+      ];
+
+      mockRepository.find = jest.fn().mockResolvedValue(mockUsers);
+
+      const result = await usersService.findAll();
+      expect(result).toEqual(mockUsers);
+    });
   });
 });

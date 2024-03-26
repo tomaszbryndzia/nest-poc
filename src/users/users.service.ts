@@ -45,9 +45,12 @@ export class UsersService {
     return user;
   }
 
-  async create(@Body() createUserDto: CreateUserDto): Promise<void> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<{ id: number }> {
     const user = new User(createUserDto);
-    await this.entityManager.save(user);
+    const res = await this.entityManager.save(user);
+    return {
+      id: res.id,
+    };
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
@@ -59,7 +62,9 @@ export class UsersService {
       user.role = updateUserDto.role;
       user.password = updateUserDto.password;
 
-      await entityManager.save(user);
+      const res = await entityManager.save(user);
+
+      return { id: res.id };
     });
   }
 
