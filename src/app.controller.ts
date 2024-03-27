@@ -12,7 +12,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('public')
+  @Get('')
   getHello(): string {
     return this.appService.getHello();
   }
