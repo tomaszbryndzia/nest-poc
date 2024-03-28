@@ -13,20 +13,51 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { User } from './entities/user.entity';
 
+enum UserRole {
+  basic = 'BASIC',
+  admin = 'ADMIN',
+}
+
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Get()
+  @ApiQuery({ name: 'role', enum: UserRole, required: false })
+  @ApiQuery({
+    name: 'take',
+    type: Number,
+    required: false,
+    description: 'pagination',
+  })
+  @ApiQuery({ name: 'skip', type: Number, required: false })
+  @ApiOkResponse({
+    description: 'Get Array of users',
+    type: CreateUserDto,
+    isArray: true,
+  })
   findAll(
     @Query('role') role?: 'BASIC' | 'ADMIN',
     @Query('take') take?: number,
     @Query('skip') skip?: number,
-  ) {
+  ): Promise<User[]> {
     return this.userService.findAll(role, take, skip);
   }
 
+  @ApiOkResponse({
+    description: 'Get user',
+    type: CreateUserDto,
+  })
+  @ApiNotFoundResponse()
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
