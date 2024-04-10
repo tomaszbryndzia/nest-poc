@@ -8,6 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { config } from './config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from './database/database.config';
+import { LoggerService } from './logger/logger.service';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { DatabaseConfig } from './database/database.config';
     }),
     UsersModule,
     AuthModule,
+    LoggerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, LoggerService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}

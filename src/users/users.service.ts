@@ -55,6 +55,13 @@ export class UsersService {
   async create(@Body() createUserDto: CreateUserDto): Promise<{ id: number }> {
     const user = this.usersRepository.create(createUserDto);
     const res = await this.usersRepository.save(user);
+
+    this.loggerService.create({
+      action_type: ACTION_TYPE.create,
+      user_id: 323,
+      action_id: res.id,
+    });
+
     return {
       id: res.id,
     };
