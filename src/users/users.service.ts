@@ -3,14 +3,21 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { LoggerService } from '../logger/logger.service';
+
+const ACTION_TYPE = {
+  create: 'CREATE_USER',
+  update: 'UPDATE_USER',
+  delete: 'DELETE_USER',
+};
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    private readonly entityManager: EntityManager,
+    private readonly loggerService: LoggerService,
   ) {}
 
   async findAll(
@@ -46,26 +53,26 @@ export class UsersService {
   }
 
   async create(@Body() createUserDto: CreateUserDto): Promise<{ id: number }> {
-    const user = new User(createUserDto);
-    const res = await this.entityManager.save(user);
+    const user = this.usersRepository.create(createUserDto);
+    const res = await this.usersRepository.save(user);
     return {
       id: res.id,
     };
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
-    await this.entityManager.transaction(async (entityManager) => {
-      const user = await this.findOne(id);
+    const user = await this.findOne(id);
 
-      user.name = updateUserDto.name;
-      user.email = updateUserDto.email;
-      user.role = updateUserDto.role;
-      user.password = updateUserDto.password;
+    if (!user) {
+      throw new Error('User not found');
+    }
 
-      const res = await entityManager.save(user);
+    user.name = updateUserDto.name;
+    user.email = updateUserDto.email;
+    user.role = updateUserDto.role;
+    user.password = updateUserDto.password;
 
-      return { id: res.id };
-    });
+    await this.usersRepository.save(user);
   }
 
   async delete(id: number): Promise<void> {
