@@ -20,6 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { PaginationDto } from 'src/shared/dto/pagination.dto';
 
 enum UserRole {
   basic = 'BASIC',
@@ -33,13 +34,6 @@ export class UsersController {
 
   @Get()
   @ApiQuery({ name: 'role', enum: UserRole, required: false })
-  @ApiQuery({
-    name: 'take',
-    type: Number,
-    required: false,
-    description: 'pagination',
-  })
-  @ApiQuery({ name: 'skip', type: Number, required: false })
   @ApiOkResponse({
     description: 'Get Array of users',
     type: CreateUserDto,
@@ -47,9 +41,9 @@ export class UsersController {
   })
   findAll(
     @Query('role') role?: 'BASIC' | 'ADMIN',
-    @Query('take') take?: number,
-    @Query('skip') skip?: number,
+    @Query() pagination?: PaginationDto,
   ): Promise<User[]> {
+    const { take, skip } = pagination;
     return this.userService.findAll(role, take, skip);
   }
 
