@@ -1,11 +1,11 @@
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { Repository, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoggerService } from 'src/logger/logger.service';
 
 const mockRepository: Repository<User> = {} as Repository<User>;
-const mockEntityManager: EntityManager = {} as EntityManager;
 
 const mockUsers: User[] = [
   {
@@ -34,9 +34,10 @@ const mockUsers: User[] = [
 describe('UsersController', () => {
   let usersController: UsersController;
   let usersService: UsersService;
+  let loggerService: LoggerService;
 
   beforeEach(async () => {
-    usersService = new UsersService(mockRepository, mockEntityManager);
+    usersService = new UsersService(mockRepository, loggerService);
     usersController = new UsersController(usersService);
   });
 
