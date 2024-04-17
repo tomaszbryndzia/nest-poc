@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumberString, IsString, IsNotEmpty } from 'class-validator';
+import {
+  IsNumberString,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateLogDto {
   @IsNotEmpty()
@@ -14,5 +19,6 @@ export class CreateLogDto {
 
   @IsNumberString()
   @ApiProperty()
+  @IsOptional()
   action_id: number;
 }

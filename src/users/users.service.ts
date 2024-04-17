@@ -52,14 +52,17 @@ export class UsersService {
     return user;
   }
 
-  async create(@Body() createUserDto: CreateUserDto): Promise<{ id: number }> {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    userId: number,
+  ): Promise<{ id: number }> {
     const user = this.usersRepository.create(createUserDto);
     const res = await this.usersRepository.save(user);
 
     this.loggerService.create({
       action_type: ACTION_TYPE.create,
-      user_id: 323,
       action_id: res.id,
+      user_id: userId,
     });
 
     return {
@@ -67,19 +70,31 @@ export class UsersService {
     };
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    userId: number,
+  ): Promise<{ message: string }> {
     const user = await this.findOne(id);
 
     if (!user) {
       throw new Error('User not found');
     }
 
-    user.name = updateUserDto.name;
-    user.email = updateUserDto.email;
-    user.role = updateUserDto.role;
-    user.password = updateUserDto.password;
+    const { name, email, role, password } = updateUserDto;
+    const updatedUser = { ...user, name, email, role, password };
 
-    await this.usersRepository.save(user);
+    await this.usersRepository.save(updatedUser);
+
+    this.loggerService.create({
+      action_id: id,
+      user_id: userId,
+      action_type: ACTION_TYPE.update,
+    });
+
+    return {
+      message: `User ${id} succesfully updated `,
+    };
   }
 
   async delete(id: number): Promise<void> {
