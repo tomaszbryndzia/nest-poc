@@ -10,6 +10,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from './database/database.config';
 import { LoggerService } from './logger/logger.service';
 import { LoggerModule } from './logger/logger.module';
+import { CookieHandlerService } from './cookie-handler/cookie-handler.service';
+import { CookieHandlerModule } from './cookie-handler/cookie-handler.module';
 
 @Module({
   imports: [
@@ -21,9 +23,10 @@ import { LoggerModule } from './logger/logger.module';
     UsersModule,
     AuthModule,
     LoggerModule,
+    CookieHandlerModule,
   ],
   controllers: [AppController],
-  providers: [AppService, LoggerService],
+  providers: [AppService, LoggerService, CookieHandlerService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
