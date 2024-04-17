@@ -9,7 +9,6 @@ import {
   Query,
   ParseIntPipe,
   ValidationPipe,
-  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,8 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
-import { PaginationDto } from 'src/shared/dto/pagination.dto';
-import { CookieHandlerService } from '../cookie-handler/cookie-handler.service';
+import { PaginationDto } from '../shared/dto/pagination.dto';
 
 enum UserRole {
   basic = 'BASIC',
@@ -32,10 +30,7 @@ enum UserRole {
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly userService: UsersService,
-    private readonly cookieHandlerService: CookieHandlerService,
-  ) {}
+  constructor(private readonly userService: UsersService) {}
 
   @Get()
   @ApiQuery({ name: 'role', enum: UserRole, required: false })
@@ -45,7 +40,6 @@ export class UsersController {
     isArray: true,
   })
   findAll(
-    @Req() request,
     @Query('role') role?: 'BASIC' | 'ADMIN',
     @Query() pagination?: PaginationDto,
   ): Promise<User[]> {
@@ -65,25 +59,19 @@ export class UsersController {
 
   @Post()
   async create(
-    @Req() request,
     @Body(ValidationPipe)
     createUserDto: CreateUserDto,
   ) {
-    const userId = this.cookieHandlerService.getCookie(request, 'user_id');
-
-    return this.userService.create(createUserDto, +userId);
+    return this.userService.create(createUserDto);
   }
 
   @Patch(':id')
   async update(
-    @Req() request,
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe)
     updateUserDto: UpdateUserDto,
   ) {
-    const userId = this.cookieHandlerService.getCookie(request, 'user_id');
-
-    return this.userService.update(id, updateUserDto, +userId);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')

@@ -14,10 +14,13 @@ export class Log {
   user_id: number;
 
   @Column()
-  action_type: string;
+  params: string;
 
   @Column()
-  action_id: number;
+  method: 'PUT' | 'POST' | 'PATCH' | 'DELETE';
+
+  @Column()
+  url: string;
 
   @Column()
   @CreateDateColumn()

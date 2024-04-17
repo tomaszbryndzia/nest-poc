@@ -6,12 +6,6 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 
-const ACTION_TYPE = {
-  create: 'CREATE_USER',
-  update: 'UPDATE_USER',
-  delete: 'DELETE_USER',
-};
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -54,18 +48,9 @@ export class UsersService {
     return user;
   }
 
-  async create(
-    @Body() createUserDto: CreateUserDto,
-    userId: number,
-  ): Promise<{ id: number }> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<{ id: number }> {
     const user = this.usersRepository.create(createUserDto);
     const res = await this.usersRepository.save(user);
-
-    this.loggerService.create({
-      action_type: ACTION_TYPE.create,
-      action_id: res.id,
-      user_id: userId,
-    });
 
     return {
       id: res.id,
@@ -75,7 +60,6 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-    userId: number,
   ): Promise<{ message: string }> {
     const user = await this.findOne(id);
 
@@ -87,12 +71,6 @@ export class UsersService {
     const updatedUser = { ...user, name, email, role, password };
 
     await this.usersRepository.save(updatedUser);
-
-    this.loggerService.create({
-      action_id: id,
-      user_id: userId,
-      action_type: ACTION_TYPE.update,
-    });
 
     return {
       message: `User ${id} succesfully updated `,

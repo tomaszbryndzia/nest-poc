@@ -1,8 +1,7 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
-import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { config } from './config';
@@ -10,8 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from './database/database.config';
 import { LoggerService } from './logger/logger.service';
 import { LoggerModule } from './logger/logger.module';
-import { CookieHandlerService } from './cookie-handler/cookie-handler.service';
-import { CookieHandlerModule } from './cookie-handler/cookie-handler.module';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -23,11 +21,12 @@ import { CookieHandlerModule } from './cookie-handler/cookie-handler.module';
     UsersModule,
     AuthModule,
     LoggerModule,
-    CookieHandlerModule,
   ],
   controllers: [AppController],
-  providers: [AppService, LoggerService, CookieHandlerService],
+  providers: [AppService, LoggerService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
 }

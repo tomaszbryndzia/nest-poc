@@ -1,9 +1,10 @@
-import { BadRequestException, Body, Injectable } from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { CreateLogDto } from './dto/create-log.dto';
 import { Log } from './entities/log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindLogsQueryDto } from './dto/find-logs-query.dto';
+import { PaginationDto } from '../shared/dto/pagination.dto';
 
 @Injectable()
 export class LoggerService {
@@ -12,22 +13,18 @@ export class LoggerService {
     private readonly logRepository: Repository<Log>,
   ) {}
 
-  //probably we would need to assign userId here to simplify action
-  create(@Body() createLogDto: CreateLogDto): void {
-    if (!createLogDto.action_id)
-      throw new BadRequestException('action_id is required');
-
+  create(@Body() createLogDto: CreateLogDto): Promise<Log> {
     const log = this.logRepository.create(createLogDto);
-    this.logRepository.save(log);
+    return this.logRepository.save(log);
   }
 
-  async findAll(take?: number, skip?: number): Promise<Log[]> {
-    const [result, total] = await this.logRepository.findAndCount({
-      take: take,
-      skip: skip,
-    });
+  async findAll(paginationDto?: PaginationDto): Promise<Log[]> {
+    const { take = 10, skip = 0 } = paginationDto || {}; // Provide default values for take and skip
 
-    console.log('count: ', total);
+    const [result] = await this.logRepository.findAndCount({
+      take,
+      skip,
+    });
 
     return [...result];
   }

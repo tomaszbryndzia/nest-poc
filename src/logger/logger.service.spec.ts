@@ -1,9 +1,11 @@
+// logger/logger.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { LoggerService } from './logger.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LoggerService } from './logger.service';
 import { Log } from './entities/log.entity';
+import { Repository } from 'typeorm';
 import { CreateLogDto } from './dto/create-log.dto';
+import { PaginationDto } from '../shared/dto/pagination.dto';
 
 describe('LoggerService', () => {
   let service: LoggerService;
@@ -32,70 +34,48 @@ describe('LoggerService', () => {
     it('should create a new log', async () => {
       const createLogDto: CreateLogDto = {
         user_id: 1,
-        action_type: 'test',
-        action_id: 1,
+        params:
+          '{"name":"John","email":"test@xxxx.com","password":"test","role":"ADMIN"}',
+        method: 'POST',
+        url: '/users',
       };
-      const log = new Log(createLogDto);
-      jest.spyOn(repository, 'create').mockReturnValue(log);
-      jest.spyOn(repository, 'save').mockResolvedValue(log);
 
-      await service.create(createLogDto);
+      const createSpy = jest
+        .spyOn(repository, 'create')
+        .mockReturnValue(createLogDto as Log);
+      const saveSpy = jest
+        .spyOn(repository, 'save')
+        .mockResolvedValue(createLogDto as Log);
 
-      expect(repository.create).toHaveBeenCalledWith(createLogDto);
-      expect(repository.save).toHaveBeenCalledWith(log);
+      const result = await service.create(createLogDto);
+
+      expect(createSpy).toHaveBeenCalledWith(createLogDto);
+      expect(saveSpy).toHaveBeenCalledWith(createLogDto);
+
+      expect(result).toEqual(createLogDto);
     });
   });
 
   describe('findAll', () => {
     it('should return an array of logs', async () => {
-      const logs: Log[] = [
-        {
-          id: 1,
-          user_id: 1,
-          action_type: 'test',
-          action_id: 1,
-          created_at: new Date(),
-        },
-      ];
-      jest
-        .spyOn(repository, 'findAndCount')
-        .mockResolvedValue([logs, logs.length]);
-
-      const result = await service.findAll();
-
-      expect(result).toEqual(logs);
-    });
-  });
-
-  describe('findByUserId', () => {
-    it('should return logs for a specific user', async () => {
-      const userId = 1;
-      const logs: Log[] = [
-        {
-          id: 1,
-          user_id: userId,
-          action_type: 'test',
-          action_id: 1,
-          created_at: new Date(),
-        },
-      ];
-      const queryParams = {
+      const paginationDto: PaginationDto = {
         take: 10,
         skip: 0,
-        startDate: new Date(),
-        endDate: new Date(),
       };
-      jest.spyOn(repository, 'createQueryBuilder').mockReturnValueOnce({
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(logs),
-      } as any);
 
-      const result = await service.findByUserId(userId, queryParams);
+      const findAndCountSpy = jest
+        .spyOn(repository, 'findAndCount')
+        .mockResolvedValueOnce([[], 0]);
 
-      expect(result).toEqual(logs);
+      const logs = await service.findAll(paginationDto);
+
+      expect(findAndCountSpy).toHaveBeenCalledWith({
+        take: paginationDto.take,
+        skip: paginationDto.skip,
+      });
+      expect(logs).toEqual([]);
     });
   });
+
+  // Add tests for other methods as needed
 });

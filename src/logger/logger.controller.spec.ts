@@ -2,46 +2,42 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LoggerController } from './logger.controller';
 import { LoggerService } from './logger.service';
-import { Log } from './entities/log.entity'; // Ensure correct import path
+import { Log } from './entities/log.entity';
 
-const logArray = [
+const logArray: Log[] = [
   {
     id: 1,
-    user_id: 1,
-    action_type: 'test',
-    action_id: 1,
+    user_id: 123,
+    params: '{"param1": "value1", "param2": "value2"}',
+    method: 'POST',
+    url: '/api/users',
     created_at: new Date(),
   },
   {
     id: 2,
-    user_id: 2,
-    action_type: 'login',
-    action_id: 2,
-    created_at: new Date('2024-04-11'),
+    user_id: 456,
+    params: '{"id": 123}',
+    method: 'PUT',
+    url: '/api/users/123',
+    created_at: new Date(),
   },
   {
     id: 3,
-    user_id: 3,
-    action_type: 'logout',
-    action_id: 3,
-    created_at: new Date('2024-04-10'),
+    user_id: 789,
+    params: '{"id": 789}',
+    method: 'PATCH',
+    url: '/api/users/789',
+    created_at: new Date(),
   },
   {
     id: 4,
-    user_id: 4,
-    action_type: 'update_profile',
-    action_id: 4,
-    created_at: new Date('2024-04-09'),
-  },
-  {
-    id: 5,
-    user_id: 5,
-    action_type: 'delete_account',
-    action_id: 5,
-    created_at: new Date('2024-04-08'),
+    user_id: 123,
+    params: '{"id": 456}',
+    method: 'DELETE',
+    url: '/api/users/456',
+    created_at: new Date(),
   },
 ];
-
 describe('LoggerController', () => {
   let controller: LoggerController;
   let service: LoggerService;

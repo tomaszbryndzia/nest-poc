@@ -4,21 +4,30 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
 
 export class CreateLogDto {
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({ description: 'Action type', example: 'CREATE_USER' })
-  action_type: string;
-
   @IsNotEmpty()
   @IsNumberString()
   @ApiProperty({ description: 'User id' })
   user_id: number;
 
-  @IsNumberString()
-  @ApiProperty()
   @IsOptional()
-  action_id: number;
+  @IsString()
+  @ApiProperty({ description: 'Request body' })
+  params: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ description: 'Request url' })
+  url: string;
+
+  @ApiProperty({
+    enum: ['PUT', 'POST', 'PATCH', 'DELETE'],
+  })
+  @IsEnum(['PUT', 'POST', 'PATCH', 'DELETE'], {
+    message: 'Valid HTTP request method required',
+  })
+  method: 'PUT' | 'POST' | 'PATCH' | 'DELETE';
 }
