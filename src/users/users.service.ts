@@ -25,15 +25,17 @@ export class UsersService {
     take?: number,
     skip?: number,
   ): Promise<User[]> {
-    const [result, total] = await this.usersRepository.findAndCount({
-      order: { name: 'DESC' },
-      take: take,
-      skip: skip,
-    });
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
-    console.log('count: ', total);
+    if (role) {
+      queryBuilder.where('user.role = :role', { role });
+    }
 
-    return [...result];
+    queryBuilder.orderBy('user.name', 'DESC').take(take).skip(skip);
+
+    const [result] = await queryBuilder.getManyAndCount();
+
+    return result;
   }
 
   async findOne(id: number): Promise<User> {
