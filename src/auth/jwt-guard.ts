@@ -23,7 +23,7 @@ export class JwtGuard extends AuthGuard('jwt') {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    const token = request.cookies?.user_token;
+    const token = request.cookies?.access_token;
 
     if (!token) {
       throw new UnauthorizedException();
