@@ -4,27 +4,24 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
+import { FindUserDto } from './dto/find-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    private readonly loggerService: LoggerService,
   ) {}
 
-  async findAll(
-    role?: 'BASIC' | 'ADMIN',
-    take?: number,
-    skip?: number,
-  ): Promise<User[]> {
+  async findAll(findUserDto?: FindUserDto): Promise<User[]> {
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
-    if (role) {
+    if (findUserDto?.role) {
+      const { role } = findUserDto;
       queryBuilder.where('user.role = :role', { role });
     }
 
+    const { skip, take } = findUserDto;
     queryBuilder.orderBy('user.name', 'DESC').take(take).skip(skip);
 
     const [result] = await queryBuilder.getManyAndCount();

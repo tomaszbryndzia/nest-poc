@@ -21,6 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { PaginationDto } from '../shared/dto/pagination.dto';
+import { FindUserDto } from './dto/find-user.dto';
 
 enum UserRole {
   basic = 'BASIC',
@@ -39,12 +40,8 @@ export class UsersController {
     type: CreateUserDto,
     isArray: true,
   })
-  findAll(
-    @Query('role') role?: 'BASIC' | 'ADMIN',
-    @Query() pagination?: PaginationDto,
-  ): Promise<User[]> {
-    const { take, skip } = pagination;
-    return this.userService.findAll(role, take, skip);
+  findAll(@Query() findUserDto?: FindUserDto): Promise<User[]> {
+    return this.userService.findAll(findUserDto);
   }
 
   @ApiOkResponse({
