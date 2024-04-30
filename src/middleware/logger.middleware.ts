@@ -9,20 +9,21 @@ export class LoggerMiddleware implements NestMiddleware {
   constructor(private readonly loggerService: LoggerService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    const {
-      originalUrl,
-      method,
-      cookies: { user_id },
-      body,
-    } = req;
+    const { originalUrl, method, cookies } = req;
+
+    if (process.env.NODE_ENV === 'test') {
+      return next();
+    }
 
     if (!isHttpMethod(method)) {
       return next();
     }
 
+    //0 is unkown user.
+    const userId = cookies?.user_id || 0;
+
     this.loggerService.create({
-      user_id,
-      params: JSON.stringify(body),
+      user_id: userId,
       method: method as HttpMethod,
       url: originalUrl,
     });

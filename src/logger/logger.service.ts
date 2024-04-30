@@ -29,7 +29,6 @@ export class LoggerService {
     return [...result];
   }
 
-  //might be expanded to support hours, minutes, seconds
   async findByUserId(
     id: number,
     queryParams?: FindLogsQueryDto,
