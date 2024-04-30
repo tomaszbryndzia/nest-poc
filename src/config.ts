@@ -1,6 +1,7 @@
 export const config = () => {
   return {
     jwtSecret: process.env.JWT_SECRET_KEY,
+    nodeEnv: process.env.NODE_ENV,
     database: {
       type: 'postgres',
       host: process.env.PG_HOST,
