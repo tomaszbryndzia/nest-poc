@@ -14,15 +14,22 @@ export class UsersService {
   ) {}
 
   async findAll(findUserDto?: FindUserDto): Promise<User[]> {
-    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+    let queryBuilder = this.usersRepository.createQueryBuilder('user');
 
     if (findUserDto?.role) {
       const { role } = findUserDto;
       queryBuilder.where('user.role = :role', { role });
     }
 
-    const { skip, take } = findUserDto;
-    queryBuilder.orderBy('user.name', 'DESC').take(take).skip(skip);
+    queryBuilder = queryBuilder.orderBy('user.name', 'DESC');
+
+    if (findUserDto?.skip) {
+      queryBuilder = queryBuilder.skip(findUserDto.skip);
+    }
+
+    if (findUserDto?.take) {
+      queryBuilder = queryBuilder.take(findUserDto.take);
+    }
 
     const [result] = await queryBuilder.getManyAndCount();
 
@@ -54,10 +61,7 @@ export class UsersService {
     };
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<{ message: string }> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<any> {
     const user = await this.findOne(id);
 
     if (!user) {
@@ -69,9 +73,7 @@ export class UsersService {
 
     await this.usersRepository.save(updatedUser);
 
-    return {
-      message: `User ${id} succesfully updated `,
-    };
+    return updatedUser;
   }
 
   async delete(id: number): Promise<void> {

@@ -20,7 +20,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
-import { PaginationDto } from '../shared/dto/pagination.dto';
 import { FindUserDto } from './dto/find-user.dto';
 
 enum UserRole {
